@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: skillproof-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: skillproof
+      POSTGRES_USER: skillproof
+      POSTGRES_PASSWORD: skillproof_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - skillproof-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillproof -d skillproof"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  skillproof-db:

@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: skillproof-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:file:./data/skillproof-store;ACCESS_MODE_DATA=rwc;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  session:
+    timeout: 14d
+    jdbc:
+      initialize-schema: always
+      schema: classpath:schema-skillproof-session.sql
+  h2:
+    console:
+      enabled: false
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      timeout: 14d
+      cookie:
+        max-age: 14d
+        http-only: true
+        same-site: lax
+skillproof:
+  ai:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-3.8-flash}
+  compiler:
+    client-id: ${JDOODLE_CLIENT_ID:}
+    client-secret: ${JDOODLE_CLIENT_SECRET:}
