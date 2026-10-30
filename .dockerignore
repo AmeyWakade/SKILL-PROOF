@@ -1,0 +1,11 @@
+.git
+.gitignore
+**/node_modules
+**/dist
+**/target
+backend/data
+**/.env
+**/.env.*
+README.md
+start-backend.bat
+start-frontend.bat
