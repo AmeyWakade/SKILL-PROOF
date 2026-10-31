@@ -29,7 +29,8 @@ public class SecurityConfig {
                 .securityContext(context -> context.securityContextRepository(contextRepository))
                 .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/health", "/api/v1/assessments/**", "/api/v1/public-profiles/**", "/api/v1/auth/csrf",
+                        .requestMatchers("/", "/index.html", "/assets/**", "/favicon.ico",
+                                "/api/v1/health", "/api/v1/assessments/**", "/api/v1/public-profiles/**", "/api/v1/auth/csrf",
                                 "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, exception) ->
