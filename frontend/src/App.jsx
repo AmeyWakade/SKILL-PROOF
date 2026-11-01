@@ -229,7 +229,7 @@ export default function App() {
 
   if (page === 'auth') return <><AuthPage mode={authMode} onMode={setAuthMode} onBack={() => { setPage('proving'); setNotice('') }} onAuthenticated={(account) => { setUser(account); setPage('proving'); setNotice(`Welcome, ${account.displayName}!`) }} theme={theme} onChangeTheme={setTheme}/>{notice && <div className="toast-message">{notice}</div>}</>
   if (page === 'public') return <PublicProfilePage id={publicProfileId} theme={theme} onChangeTheme={setTheme}/>
-  if (page === 'profile') return <ProfilePage user={user} onBack={() => setPage('explore')} onUpdated={(updated) => { setUser(updated); setNotice('Your profile has been saved.') }} theme={theme} onChangeTheme={setTheme}/>
+  if (page === 'profile') return <ProfilePage user={user} onBack={() => setPage('explore')} onContinueLearning={() => setPage('proving')} onUpdated={(updated) => { setUser(updated); setNotice('Your profile has been saved.') }} theme={theme} onChangeTheme={setTheme}/>
   const openPage = (destination) => {
     if (!user) { setAuthMode('login'); setPage('auth'); setNotice('Sign in or create a free account to access your workspace.'); return }
     setPage(destination)

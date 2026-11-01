@@ -11,7 +11,7 @@ function profileForm(profile) {
   return { ...profile, skills: (profile.skills || []).join(', ') }
 }
 
-export default function CareerWorkspace({ onBack, user, onUpdated, theme, onChangeTheme }) {
+export default function CareerWorkspace({ onBack, onContinueLearning = () => {}, user, onUpdated, theme, onChangeTheme }) {
   const [profile, setProfile] = useState(null)
   const [projects, setProjects] = useState([])
   const [editForm, setEditForm] = useState(null)
@@ -47,11 +47,13 @@ export default function CareerWorkspace({ onBack, user, onUpdated, theme, onChan
   const incompleteProject = projects.find((project) => project.status !== 'COMPLETED')
   const recommendedAction = !profile?.targetRole
     ? { label: 'Set your career goal', action: () => setMode('details') }
+    : skillList.length === 0
+      ? { label: 'Choose skills to focus on', action: () => setMode('details') }
     : projects.length === 0
       ? { label: 'Add a project from your experience', action: () => beginProject() }
       : incompleteProject
         ? { label: `Update “${incompleteProject.title}”`, action: () => editProject(incompleteProject) }
-        : { label: 'Preview your shareable profile', action: openPreview }
+          : { label: 'Practice your selected skills', action: onContinueLearning }
 
   async function saveProfile(continueLater = false) {
     setBusy(true)
@@ -164,7 +166,7 @@ export default function CareerWorkspace({ onBack, user, onUpdated, theme, onChan
         {projects.length ? <div className="career-project-list">{projects.map((project) => <article className="career-project" key={project.id}><div className="career-project-content"><div className="career-project-title"><h3>{project.title}</h3><span className={`project-status status-${project.status?.toLowerCase() || 'planned'}`}>{statusLabels[project.status] || 'Planned'}</span></div><p>{project.description}</p>{project.skills && <div className="tags">{project.skills.split(',').map((skill) => <span key={skill}>{skill.trim()}</span>)}</div>}<small className="project-sharing">{project.publicVisible ? 'Selected for public profile' : 'Private project'}</small></div><div className="career-project-actions"><button className="secondary-button" onClick={() => editProject(project)}>Edit</button><button className="icon-button" aria-label={`Remove ${project.title}`} onClick={() => removeProject(project)}><Trash2 size={16}/></button></div></article>)}</div> : <div className="career-empty"><BriefcaseBusiness size={22}/><b>No projects yet</b><span>Add an idea or something you have worked on. We won’t create project content for you.</span><button className="secondary-button" onClick={beginProject}>Add your first project</button></div>}
       </section>
 
-      <section className="career-next-action"><div><span className="career-card-icon"><ArrowRight size={17}/></span><div><small>RECOMMENDED NEXT ACTION</small><h2>{recommendedAction.label}</h2><p>{!profile.targetRole ? 'A goal gives your workspace a focus.' : projects.length === 0 ? 'Start with real work you have done or a project idea you plan to build.' : incompleteProject ? 'Update the project status when your progress changes.' : 'Review your selected details and share only what you want.'}</p></div></div><button className="primary-button" onClick={recommendedAction.action}>{recommendedAction.label.startsWith('Preview') ? <Eye size={15}/> : <ArrowRight size={15}/>} Continue</button></section>
+      <section className="career-next-action" aria-labelledby="career-next-title"><div><span className="career-card-icon"><ArrowRight size={17}/></span><div><small>RECOMMENDED NEXT ACTION</small><h2 id="career-next-title">{recommendedAction.label}</h2><p>{!profile.targetRole ? 'A goal gives your workspace a focus.' : skillList.length === 0 ? 'Choose the skills you want your next practice session to focus on.' : projects.length === 0 ? 'Start with real work you have done or a project idea you plan to build.' : incompleteProject ? 'Update the project status when your progress changes.' : 'Take this career plan into Proving Ground and practice the skills you selected.'}</p></div></div><button className="primary-button" aria-label={`Continue: ${recommendedAction.label}`} onClick={recommendedAction.action}>{recommendedAction.label.startsWith('Preview') ? <Eye size={15}/> : <ArrowRight size={15}/>} Continue</button></section>
 
       <section className="career-sharing"><div><b>Public profile</b><small>{profile.publicProfileEnabled ? 'Enabled. Only the details and projects you selected are shown.' : 'Private. Your preview is visible only to you.'}</small></div><button className="secondary-button" onClick={() => setMode('details')}>Edit sharing choices</button></section>
       <div className="career-footer-actions"><button className="secondary-button" onClick={() => setMode('details')}>Edit details</button><button className="secondary-button" onClick={openPreview}><Eye size={15}/> Preview profile</button><button className="text-action" onClick={onBack}>Continue later <ArrowRight size={15}/></button></div>

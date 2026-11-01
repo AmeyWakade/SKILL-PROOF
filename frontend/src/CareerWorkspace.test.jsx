@@ -90,4 +90,18 @@ describe('Career Workspace', () => {
     expect(within(dialog).queryByText('Private goal')).not.toBeInTheDocument()
     expect(within(dialog).queryByText('Study planner')).not.toBeInTheDocument()
   })
+
+  it('continues into Proving Ground practice after the goal, skills, and project are ready', async () => {
+    const onContinueLearning = vi.fn()
+    apiMock.mockImplementation(async (url) => {
+      if (url === '/api/v1/profile') return { ...initialProfile, targetRole: 'Java developer', skills: ['Java'] }
+      if (url === '/api/v1/portfolio-projects') return [{ ...project, status: 'COMPLETED' }]
+      throw new Error(`Unexpected GET ${url}`)
+    })
+    render(<CareerWorkspace {...props} onContinueLearning={onContinueLearning}/>);
+
+    expect(await screen.findByRole('heading', { name: 'Practice your selected skills' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue: Practice your selected skills' }))
+    expect(onContinueLearning).toHaveBeenCalledOnce()
+  })
 })
