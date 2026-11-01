@@ -6,7 +6,7 @@ SkillProof helps students and developers show what they can do through practical
 - Spring Boot REST API with health, assessment list, search/filter, and detail endpoints
 - H2 file database and JDBC-backed login sessions, so accounts and login survive backend restarts
 - Sample assessments seeded automatically when the API starts
-- React + Vite frontend with search, filters, challenge details, practice quizzes, and responsive layout
+- React + Vite frontend with the Proving Ground learning hub, the existing assessment catalog, searchable notes, and responsive layout
 - Account registration and login, with BCrypt password hashes, server sessions, and CSRF protection
 - Editable profile fields and account-specific saved assessments
 - Career Workspace with an editable career goal, self-reported skill list, simple roadmap, and recommended next action
@@ -24,6 +24,18 @@ SkillProof helps students and developers show what they can do through practical
 
 Signed-in quiz results save the score and a private question-by-question review to the learner's account. Open **My proof** to review answers after signing in again. Older attempts created before this review was added keep their score and date, but do not have saved answer details. Public profiles continue to show only the existing opt-in achievement summary; the private answer review is not included in public profile responses. Practice scores are learning records, not verified certifications.
 
+## Proving Ground
+
+Open **Proving Ground** from the sidebar for five learning areas:
+
+- **MCQs** takes you to the existing assessment catalog and its existing practice, save, and result-history flow.
+- **Quizzes** offers short, topic-grouped checks for Java collections, React state, and HTTP APIs. These are distinct from the longer catalog assessments, but signed-in quiz attempts reuse the existing `/api/v1/practice-attempts` persistence and appear under their related assessment in **My proof**. The saved answer review prefixes quiz questions with the quiz title. Guest results are available only in the current session.
+- **Coding** contains example programming challenges and starter code. There is no execution in this section; saving a submission stores the draft in this browser's `localStorage` and does not run or verify the code.
+- **Notes** contains searchable, bundled topic notes with links into the related quiz or coding challenge.
+- **Practice** provides repeatable short sets. Each signed-in run is a separate private attempt in the existing account history; guest runs are session-only.
+
+Section content is bundled with the React app in `frontend/src/provingGroundContent.js`; it does not add a database table, authentication mechanism, or external service. Coding drafts are local to one browser and are not synchronized between devices. Local setup is unchanged: start the Spring Boot API and Vite frontend using the steps below. The backend needs to be running and the user signed in to persist quiz or practice results.
+
 ## Requirements
 - JDK 21+
 - Maven 3.9+
@@ -35,6 +47,7 @@ Signed-in quiz results save the score and a private question-by-question review 
 cd backend
 mvn test
 cd ..\frontend
+npm test
 npm run build
 ```
 
