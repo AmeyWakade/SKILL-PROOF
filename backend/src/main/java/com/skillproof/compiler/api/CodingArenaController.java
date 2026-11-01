@@ -3,6 +3,7 @@ package com.skillproof.compiler.api;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class CodingArenaController {
     private final Runner runner;
 
+    @Autowired
     public CodingArenaController(CompilerController compiler) {
         this(request -> compiler.run(new CompilerController.RunRequest("java", request.source(), request.stdin())));
     }
