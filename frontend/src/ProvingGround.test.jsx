@@ -57,15 +57,24 @@ describe('Proving Ground', () => {
     expect(onSaveAttempt).not.toHaveBeenCalled()
   })
 
-  it('saves coding drafts locally and clearly reports that execution is unavailable', async () => {
-    render(<ProvingGround assessments={assessments}/>)
-    fireEvent.click(screen.getByRole('button', { name: /Coding/ }))
-    expect(screen.getByText('Execution unavailable')).toBeInTheDocument()
-    expect(screen.getByText(/does not run or verify your code/)).toBeInTheDocument()
-    fireEvent.change(screen.getByRole('textbox', { name: /Starter code/ }), { target: { value: 'class WordCounter { /* draft */ }' } })
-    expect(JSON.parse(window.localStorage.getItem('skillproof-proving-ground-drafts-v1'))['word-frequency']).toContain('draft')
-    fireEvent.click(screen.getByRole('button', { name: /Save submission draft/ }))
-    expect(await screen.findByRole('status')).toHaveTextContent(/no correctness check was run/)
+  it('opens the Coding Arena, preserves the previous prompt, and filters problems', async () => {
+    window.localStorage.setItem('skillproof-proving-ground-drafts-v1', JSON.stringify({ 'word-frequency': 'class WordCounter { /* draft */ }' }))
+    render(<ProvingGround assessments={assessments}/> )
+    fireEvent.click(screen.getByRole('button', { name: /Coding Arena/ }))
+    expect(await screen.findByRole('heading', { name: 'Coding Arena.' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Best rise in a number series/ })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /First character that appears once/ }))
+    expect(await screen.findByRole('heading', { name: 'First character that appears once' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Problem browser/ }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search problems' }), { target: { value: 'word frequencies' } })
+    fireEvent.click(screen.getByRole('button', { name: /Count word frequencies/ }))
+    expect(screen.getByRole('textbox', { name: 'Java solution' })).toHaveValue('class WordCounter { /* draft */ }')
+    expect(screen.getByText(/custom runner format is not yet available/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Problem browser/ }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search problems' }), { target: { value: '' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Topic' }), { target: { value: 'Strings' } })
+    expect(screen.getByRole('button', { name: /Case-free palindrome check/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Best rise/ })).not.toBeInTheDocument()
   })
 
   it('can repeat a practice set and stores each signed-in run separately', async () => {
