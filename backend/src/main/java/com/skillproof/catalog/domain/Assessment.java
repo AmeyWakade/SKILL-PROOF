@@ -12,12 +12,14 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.BatchSize;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "assessments")
+@BatchSize(size = 32)
 public class Assessment {
     @Id private UUID id;
     @NotBlank @Size(max = 120) @Column(nullable = false, length = 120) private String title;

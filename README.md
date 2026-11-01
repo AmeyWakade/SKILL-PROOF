@@ -9,7 +9,10 @@ SkillProof helps students and developers show what they can do through practical
 - React + Vite frontend with search, filters, challenge details, practice quizzes, and responsive layout
 - Account registration and login, with BCrypt password hashes, server sessions, and CSRF protection
 - Editable profile fields and account-specific saved assessments
-- Account-specific practice score history, clearly marked as practice rather than verified proof
+- Career Workspace with an editable career goal, self-reported skill list, simple roadmap, and recommended next action
+- Private-by-default profile sharing controls for career details, skills, and individual projects; the public profile and signed-in preview use the same server-filtered data
+- Project title, description, self-reported skills, Planned/In Progress/Completed status, and optional GitHub/demo links
+- Account-specific practice score history with saved per-question answers and explanations, clearly marked as practice rather than verified proof
 - Career practice tracks for backend, frontend, data, security, cloud/DevOps, UI/UX, product, and QA
 - Opt-in public portfolios with career-path practice badges and a copyable resume link
 - Gemini-powered AI Career Coach chat, with provider credentials kept on the backend
@@ -17,10 +20,23 @@ SkillProof helps students and developers show what they can do through practical
 - Code playground for Java, Python, JavaScript, C, and C++ using JDoodle's compiler API
 - Five saved color palettes: Meadow, Ocean, Lavender, Sunset, and Midnight
 
+## Practice review and privacy
+
+Signed-in quiz results save the score and a private question-by-question review to the learner's account. Open **My proof** to review answers after signing in again. Older attempts created before this review was added keep their score and date, but do not have saved answer details. Public profiles continue to show only the existing opt-in achievement summary; the private answer review is not included in public profile responses. Practice scores are learning records, not verified certifications.
+
 ## Requirements
 - JDK 21+
 - Maven 3.9+
 - Node.js 22.12+ with npm
+
+## Build and test
+
+```powershell
+cd backend
+mvn test
+cd ..\frontend
+npm run build
+```
 
 Docker is optional. You can run the MVP with H2 without Docker or administrator access.
 
@@ -120,6 +136,8 @@ Create a Neon project and copy its connection details. In the connection string,
 
 Keep credentials in Render's environment settings, not in GitHub or in frontend variables. After the first deploy, test registration, sign-in, profile saving, and a page refresh.
 
+To enable the code playground on an existing Render service, open **SKILL-PROOF > Environment**, add `JDOODLE_CLIENT_ID` and `JDOODLE_CLIENT_SECRET` with the values from your JDoodle API account, then save the changes and wait for Render to redeploy. Return to the playground and select **I added the keys and restarted — check again**. The backend status should report the compiler as enabled. JDoodle may enforce account-specific usage limits.
+
 ### Free-tier notes
 
 Render's free web service sleeps after 15 minutes without traffic and may take about a minute to wake up. Its local files disappear on restarts and deploys, which is why this setup uses PostgreSQL instead of H2 for online accounts and sessions. Render's own free Postgres databases expire after 30 days, so this guide uses Neon for the database; check the providers' current limits before relying on the site for important data. Free hosting is suitable for a demo, not a production service.
@@ -130,13 +148,22 @@ Render's free web service sleeps after 15 minutes without traffic and may take a
 - `GET /api/v1/assessments/{id}` — assessment details
 - `POST /api/v1/auth/register` and `POST /api/v1/auth/login` — account access
 - `GET /api/v1/auth/me` and `POST /api/v1/auth/logout` — current persistent session
-- `GET/PUT /api/v1/profile` — read or update your profile
+- `GET/PUT /api/v1/profile` — read or update career details and explicit public-sharing settings
+- `GET /api/v1/profile/preview` — signed-in preview of the same filtered projection returned publicly
 - `GET /api/v1/saved-assessments` and `POST/DELETE /api/v1/saved-assessments/{assessmentId}` — saved challenges
 - `GET/POST /api/v1/practice-attempts` — practice history
-- `GET /api/v1/public-profiles/{userId}` — opt-in public portfolio, achievements, and practice badges
-- `GET /api/v1/portfolio-projects`, `POST /api/v1/portfolio-projects`, and `DELETE /api/v1/portfolio-projects/{id}` — manage showcase projects
+- `GET /api/v1/public-profiles/{userId}` — opt-in public projection containing only selected career details, skills, and projects; private practice history is excluded
+- `GET/POST /api/v1/portfolio-projects`, `PUT/DELETE /api/v1/portfolio-projects/{id}` — manage your own projects; updates are owner-scoped
 - `GET /api/v1/ai/status` and `POST /api/v1/ai/chat` — AI Career Coach; requires a backend `GEMINI_API_KEY`
 - `GET /api/v1/integrations/github/repository?url=...` — import metadata for a public GitHub repository
 - `GET /api/v1/compiler/status` and `POST /api/v1/compiler/run` — multi-language playground; requires backend JDoodle credentials
 
 Accounts, saved assessments, practice history, and sessions are stored under `backend/data/` and survive backend restarts. Back up that directory if you want to preserve local data. Practice scores are self-reported by this MVP and are not verified credentials.
+
+## Career Workspace and profile privacy
+
+After signing in, open **Career workspace** to edit your goal and selected skills, see a three-step roadmap, and add projects. Projects support Planned, In Progress, and Completed status, an optional GitHub link, an optional demo link, and an optional existing project link. The app only stores what you enter; it does not invent project descriptions or verify skills. Every score and selected skill is labeled as self-reported practice or profile information, not a verified credential.
+
+Public profiles start disabled. Career details, selected skills, and each project also start hidden. To publish a profile, enable **Enable my public profile**, then explicitly select career details and/or skills in the workspace. Each project has its own sharing checkbox. **Preview profile** calls the backend's filtered profile projection, the same projection used by public links. The public API does not return email addresses, password hashes, or practice history. Keep your profile disabled if you do not want a public link to work.
+
+Career details and projects use the app's configured relational database: the default local setup stores them in the H2 files under `backend/data/`; when `DATABASE_URL`, `DATABASE_USERNAME`, and `DATABASE_PASSWORD` are set, they are stored in PostgreSQL instead. Schema changes are currently applied by Hibernate's `ddl-auto: update` setting rather than Flyway migrations, so back up the database before upgrading a deployed instance. Existing project rows keep their existing project link and are treated as Planned and private unless you change those choices.

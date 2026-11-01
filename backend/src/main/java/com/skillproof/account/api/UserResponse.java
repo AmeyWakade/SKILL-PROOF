@@ -7,9 +7,11 @@ import java.util.UUID;
 
 public record UserResponse(UUID id, String email, String displayName, String headline, String bio,
                            String location, String targetRole, List<String> skills, Instant createdAt,
-                           boolean publicProfileEnabled) {
+                           boolean publicProfileEnabled, boolean publicCareerDetailsEnabled,
+                           boolean publicSkillsEnabled) {
     public static UserResponse from(AppUser user) {
         return new UserResponse(user.getId(), user.getEmail(), user.getDisplayName(), user.getHeadline(),
-                user.getBio(), user.getLocation(), user.getTargetRole(), user.getSkills(), user.getCreatedAt(), user.isPublicProfileEnabled());
+                user.getBio(), user.getLocation(), user.getTargetRole(), user.getSkills(), user.getCreatedAt(),
+                user.isPublicProfileEnabled(), user.isPublicCareerDetailsEnabled(), user.isPublicSkillsEnabled());
     }
 }

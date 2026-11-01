@@ -4,6 +4,7 @@ import com.skillproof.account.domain.AppUser;
 import com.skillproof.account.domain.AppUserRepository;
 import com.skillproof.portfolio.domain.PortfolioProject;
 import com.skillproof.portfolio.domain.PortfolioProjectRepository;
+import com.skillproof.portfolio.domain.ProjectStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -30,10 +31,23 @@ public class PortfolioProjectController {
 
     @PostMapping @Transactional
     public ProjectResponse create(@Valid @RequestBody ProjectRequest request, Principal principal) {
-        requireWebUrl(request.projectUrl());
+        validateLinks(request);
         AppUser user = findUser(principal.getName());
         String skills = request.skills() == null ? "" : request.skills().stream().map(String::trim).filter(s -> !s.isBlank()).distinct().limit(8).collect(java.util.stream.Collectors.joining(", "));
-        return ProjectResponse.from(projects.save(new PortfolioProject(UUID.randomUUID(), user, request.title(), request.description(), request.projectUrl(), skills)));
+        return ProjectResponse.from(projects.save(new PortfolioProject(UUID.randomUUID(), user, request.title(), request.description(),
+                request.projectUrl(), request.githubUrl(), request.demoUrl(), skills, request.status(), request.publicVisible())));
+    }
+
+    @PutMapping("/{id}") @Transactional
+    public ProjectResponse update(@PathVariable UUID id, @Valid @RequestBody ProjectRequest request, Principal principal) {
+        validateLinks(request);
+        AppUser user = findUser(principal.getName());
+        PortfolioProject project = projects.findByIdAndUser(id, user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+        String skills = request.skills() == null ? "" : request.skills().stream().map(String::trim).filter(s -> !s.isBlank()).distinct().limit(8).collect(java.util.stream.Collectors.joining(", "));
+        project.update(request.title(), request.description(), request.projectUrl(), request.githubUrl(), request.demoUrl(),
+                skills, request.status(), request.publicVisible());
+        return ProjectResponse.from(projects.save(project));
     }
 
     @DeleteMapping("/{id}") @Transactional @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -41,14 +55,30 @@ public class PortfolioProjectController {
         projects.delete(projects.findByIdAndUser(id, findUser(principal.getName())).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found")));
     }
 
-    private void requireWebUrl(String url) {
+    private void validateLinks(ProjectRequest request) {
+        requireWebUrl(request.projectUrl(), "Project link");
+        requireWebUrl(request.demoUrl(), "Demo link");
+        requireWebUrl(request.githubUrl(), "GitHub link");
+        if (request.githubUrl() != null && !request.githubUrl().isBlank()) {
+            String host = URI.create(request.githubUrl()).getHost();
+            if (host == null || !(host.equalsIgnoreCase("github.com") || host.equalsIgnoreCase("www.github.com")))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "GitHub link must use github.com");
+        }
+    }
+    private void requireWebUrl(String url, String label) {
+        if (url == null || url.isBlank()) return;
         try { URI uri = URI.create(url); if (!("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) || uri.getHost() == null) throw new IllegalArgumentException(); }
-        catch (RuntimeException e) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Project link must be a valid http or https URL"); }
+        catch (RuntimeException e) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, label + " must be a valid http or https URL"); }
     }
     private AppUser findUser(String email) { return users.findByEmail(email.trim().toLowerCase(Locale.ROOT)).orElseThrow(); }
     public record ProjectRequest(@NotBlank @Size(max=100) String title, @NotBlank @Size(max=1000) String description,
-                                 @NotBlank @Size(max=500) String projectUrl, List<@Size(max=40) String> skills) { }
-    public record ProjectResponse(UUID id, String title, String description, String projectUrl, String skills, java.time.Instant createdAt) {
-        static ProjectResponse from(PortfolioProject project) { return new ProjectResponse(project.getId(), project.getTitle(), project.getDescription(), project.getProjectUrl(), project.getSkills(), project.getCreatedAt()); }
+                                 @Size(max=500) String projectUrl, List<@Size(max=40) String> skills,
+                                 @Size(max=500) String githubUrl, @Size(max=500) String demoUrl,
+                                 ProjectStatus status, boolean publicVisible) { }
+    public record ProjectResponse(UUID id, String title, String description, String projectUrl, String githubUrl,
+                                  String demoUrl, String skills, ProjectStatus status, boolean publicVisible,
+                                  java.time.Instant createdAt) {
+        static ProjectResponse from(PortfolioProject project) { return new ProjectResponse(project.getId(), project.getTitle(), project.getDescription(), project.getProjectUrl(),
+                project.getGithubUrl(), project.getDemoUrl(), project.getSkills(), project.getStatus(), project.isPublicVisible(), project.getCreatedAt()); }
     }
 }

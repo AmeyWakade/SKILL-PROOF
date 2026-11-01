@@ -10,4 +10,6 @@ public record ProfileUpdateRequest(@NotBlank @Size(max = 80) String displayName,
                                    @Size(max = 100) String location,
                                    @Size(max = 100) String targetRole,
                                    List<@Size(max = 40) String> skills,
-                                   boolean publicProfileEnabled) { }
+                                   boolean publicProfileEnabled,
+                                   boolean publicCareerDetailsEnabled,
+                                   boolean publicSkillsEnabled) { }

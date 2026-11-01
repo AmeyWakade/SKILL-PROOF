@@ -29,6 +29,8 @@ public class AppUser {
     @Size(max = 100) @Column(length = 100) private String targetRole = "";
     @Column(nullable = false) private Instant createdAt;
     @Column(nullable = false) private boolean publicProfileEnabled = false;
+    @Column(name = "public_career_details_enabled") private Boolean publicCareerDetailsEnabled = false;
+    @Column(name = "public_skills_enabled") private Boolean publicSkillsEnabled = false;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "skill", nullable = false, length = 40)
@@ -40,10 +42,14 @@ public class AppUser {
         this.id = id; this.email = email; this.passwordHash = passwordHash; this.displayName = displayName;
         this.createdAt = Instant.now();
     }
-    public void updateProfile(String displayName, String headline, String bio, String location, String targetRole, List<String> skills, boolean publicProfileEnabled) {
+    public void updateProfile(String displayName, String headline, String bio, String location, String targetRole,
+                              List<String> skills, boolean publicProfileEnabled,
+                              boolean publicCareerDetailsEnabled, boolean publicSkillsEnabled) {
         this.displayName = displayName.trim(); this.headline = clean(headline); this.bio = clean(bio);
         this.location = clean(location); this.targetRole = clean(targetRole);
         this.publicProfileEnabled = publicProfileEnabled;
+        this.publicCareerDetailsEnabled = publicCareerDetailsEnabled;
+        this.publicSkillsEnabled = publicSkillsEnabled;
         this.skills = skills == null ? new ArrayList<>() : skills.stream().map(String::trim).filter(s -> !s.isBlank()).distinct().limit(12).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
     }
     private String clean(String value) { return value == null ? "" : value.trim(); }
@@ -57,5 +63,7 @@ public class AppUser {
     public String getTargetRole() { return targetRole; }
     public Instant getCreatedAt() { return createdAt; }
     public boolean isPublicProfileEnabled() { return publicProfileEnabled; }
+    public boolean isPublicCareerDetailsEnabled() { return Boolean.TRUE.equals(publicCareerDetailsEnabled); }
+    public boolean isPublicSkillsEnabled() { return Boolean.TRUE.equals(publicSkillsEnabled); }
     public List<String> getSkills() { return List.copyOf(skills); }
 }

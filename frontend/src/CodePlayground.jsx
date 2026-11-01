@@ -11,6 +11,7 @@ const languages = [
 ]
 
 export default function CodePlayground() {
+  const isRender = window.location.hostname.endsWith('.onrender.com')
   const [language, setLanguage] = useState(languages[0])
   const [source, setSource] = useState(languages[0].example)
   const [stdin, setStdin] = useState('')
@@ -41,7 +42,9 @@ export default function CodePlayground() {
 
   return <section className="catalog playground-view">
     <div className="section-head"><div><div className="section-kicker">CODE PLAYGROUND</div><h2>Try code across languages<span>.</span></h2><p>Run a small sample to explore syntax and language behavior.</p></div><span className="playground-provider"><Code2 size={16}/> JDoodle</span></div>
-    {!checking && !enabled && <div className="playground-setup"><b>One-time setup needed</b><span>Set both JDoodle credentials in the same PowerShell window that starts the backend, then restart the API. Setting them in a separate window won’t update an API that is already running. Use the project README for setup steps.</span>{setupError && <small>{setupError}</small>}<button className="playground-check" onClick={checkSetup}>I restarted the API — check again</button></div>}
+    {!checking && !enabled && <div className="playground-setup"><b>One-time setup needed</b>{isRender
+      ? <span>In Render, open your <b>SKILL-PROOF</b> web service → <b>Environment</b>. Add <code>JDOODLE_CLIENT_ID</code> and <code>JDOODLE_CLIENT_SECRET</code> using the values from your JDoodle account, then save and redeploy. Keep the secret in Render; never add it to the frontend or GitHub.</span>
+      : <span>Set <code>JDOODLE_CLIENT_ID</code> and <code>JDOODLE_CLIENT_SECRET</code> in the same PowerShell window that starts the backend, then restart the API. The setup steps are in the project README.</span>}{setupError && <small>{setupError}</small>}<button className="playground-check" onClick={checkSetup}>I added the keys and restarted — check again</button></div>}
     <div className="playground-toolbar"><label>Language<select value={language.id} onChange={changeLanguage}>{languages.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><div><button className="playground-reset" onClick={() => { setSource(language.example); setResult(null); setError('') }}><RotateCcw size={14}/> Reset</button><button className="primary-button" disabled={running || !enabled} onClick={runCode}><Play size={14}/>{running ? 'Running…' : 'Run code'}</button></div></div>
     <label className="code-label">Your code<textarea className="code-editor" spellCheck="false" value={source} onChange={(event) => setSource(event.target.value)} maxLength={12000} /></label>
     <label className="code-label stdin-label">Standard input <small>Optional text passed to your program</small><textarea className="stdin-editor" value={stdin} onChange={(event) => setStdin(event.target.value)} maxLength={2000} placeholder="Type input for your program…" /></label>

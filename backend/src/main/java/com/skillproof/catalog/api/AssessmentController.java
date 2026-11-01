@@ -20,4 +20,5 @@ public class AssessmentController {
     }
     @GetMapping("/{id}")
     public AssessmentResponse findById(@PathVariable UUID id) { return service.findById(id); }
+
 }
