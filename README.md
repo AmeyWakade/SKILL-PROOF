@@ -17,8 +17,9 @@ SkillProof helps students and developers show what they can do through practical
 - Opt-in public portfolios with career-path practice badges and a copyable resume link
 - Gemini-powered AI Career Coach chat, with provider credentials kept on the backend
 - GitHub public repository import to prefill portfolio project details
-- Code playground for Java, Python, JavaScript, C, and C++ using JDoodle's compiler API
-- Five saved color palettes: Meadow, Ocean, Lavender, Sunset, and Midnight
+- IDE-style code playground for Java, Python, JavaScript, C, and C++ using JDoodle's compiler API; language drafts stay separate and the editor supports Ctrl/Command+Enter to run
+- Five saved color palettes: Meadow, Ocean, Lavender, Sunset, and Midnight, with a separate light/dark appearance control
+- Interactive two-column profile/workspace menus from both the top-right account button and the lower-left sidebar account control, plus actionable notifications for connection, practice, and saved work
 
 ## Practice review and privacy
 
@@ -34,10 +35,10 @@ Open **Proving Ground** from the sidebar for five learning areas:
 - Java samples and hidden-test submissions use the existing authenticated backend JDoodle integration. Credentials remain on the server. The backend keeps hidden test inputs and expected outputs out of browser responses; one submit runs two JDoodle cases, while each sample run sends one request per example. Provider quotas apply. Sample results are practice feedback and do not mark a problem solved; a problem becomes solved in the browser only after every hidden test passes.
 - Coding drafts, attempt history, completion status, and daily goal are stored in this browser's `localStorage`, separate from account assessment history. They do not sync to another browser or represent a verified credential. Previous Coding prompts remain in the Arena, and their existing draft keys are read without deleting them; those legacy prompts are preserved but not executable by the Java runner.
 - The Arena uses an accessible standard Java textarea instead of an editor dependency. Code execution is never performed in the browser or the Spring process; it is sent to JDoodle through the backend. Sign in and configure the backend JDoodle credentials before running code. If the provider is unconfigured, browsing and editing drafts still work and the UI reports that state.
-- **Notes** contains searchable, bundled topic notes with links into the related quiz or coding challenge.
+- **Notes** contains searchable, bundled topic notes with links into the related quiz or coding challenge, plus structured C, C++, Python, and Java learning paths from first programs through advanced and professional topics.
 - **Practice** provides repeatable short sets. Each signed-in run is a separate private attempt in the existing account history; guest runs are session-only.
 
-MCQ, quiz, notes, and practice content remain bundled in `frontend/src/provingGroundContent.js`. Java Arena problems are bundled separately in `frontend/src/codingArenaContent.js`; hidden cases are held in the authenticated `POST /api/v1/coding-arena/{problemId}/submit` backend route. This adds no database tables, authentication mechanism, or npm dependency. Local setup is unchanged: start the Spring Boot API and Vite frontend using the steps below. Existing JDoodle setup instructions below apply to the Arena too.
+MCQ, quiz, topic-note, and practice content remain bundled in `frontend/src/provingGroundContent.js`. Language curricula live in `frontend/src/languageLearningPaths.js`; Java Arena problems are bundled separately in `frontend/src/codingArenaContent.js`; hidden cases are held in the authenticated `POST /api/v1/coding-arena/{problemId}/submit` backend route. This adds no database tables, authentication mechanism, or npm dependency. Local setup is unchanged: start the Spring Boot API and Vite frontend using the steps below. Existing JDoodle setup instructions below apply to the Arena and IDE-style playground.
 
 ## Requirements
 - JDK 21+

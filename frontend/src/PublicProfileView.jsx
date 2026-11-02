@@ -1,9 +1,9 @@
 import { ExternalLink, ShieldCheck } from 'lucide-react'
 import ThemePicker from './ThemePicker'
 
-export default function PublicProfileView({ profile, theme, onChangeTheme, preview = false }) {
+export default function PublicProfileView({ profile, theme, onChangeTheme, appearance, onChangeAppearance, preview = false }) {
   return <main className="public-screen">
-    <header className="public-brand"><span className="brand-icon"><ShieldCheck size={20}/></span> skillproof {theme && <ThemePicker theme={theme} onChange={onChangeTheme}/>} {!preview && <a href="/">Explore assessments</a>}</header>
+    <header className="public-brand"><span className="brand-icon"><ShieldCheck size={20}/></span> skillproof {theme && <ThemePicker theme={theme} onChange={onChangeTheme} appearance={appearance} onChangeAppearance={onChangeAppearance}/>} {!preview && <a href="/">Explore assessments</a>}</header>
     <section className="public-card">
       {preview && <p className="preview-label" role="status">Preview of the same fields visitors can see. Practice history stays private.</p>}
       <div className="public-identity"><span className="public-avatar">{profile.displayName?.slice(0, 1)?.toUpperCase()}</span><div><div className="section-kicker">SKILLPROOF PORTFOLIO</div><h1>{profile.displayName}</h1>{(profile.headline || profile.targetRole || profile.location) && <p>{profile.headline || profile.targetRole}{profile.location ? ` · ${profile.location}` : ''}</p>}</div></div>

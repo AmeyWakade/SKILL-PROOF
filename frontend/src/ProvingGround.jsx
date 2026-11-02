@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, BookOpen, Check, Code2, FileText, Play, RotateCcw, Search, Sparkles, Target } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronDown, Code2, FileText, Play, RotateCcw, Search, Sparkles, Target } from 'lucide-react'
 import { practiceSets, quizTopics, scoreQuiz, topicNotes } from './provingGroundContent'
+import { languageLearningPaths } from './languageLearningPaths'
 import CodingArena from './CodingArena'
 
 const sections = [
@@ -21,7 +22,10 @@ export default function ProvingGround({ assessments = [], attempts = [], user, o
   const [saveMessage, setSaveMessage] = useState('')
   const [saving, setSaving] = useState(false)
   const [challengeId, setChallengeId] = useState(null)
+  const [selectedLanguage, setSelectedLanguage] = useState('java')
   const visibleNotes = useMemo(() => topicNotes.filter((note) => `${note.title} ${note.topic} ${note.body} ${note.bullets.join(' ')}`.toLowerCase().includes(search.toLowerCase())), [search])
+  const activeLanguage = languageLearningPaths.find((path) => path.id === selectedLanguage) || languageLearningPaths[0]
+  const visibleLanguageModules = activeLanguage.modules.filter((module) => `${module.stage} ${module.title} ${module.summary} ${module.example}`.toLowerCase().includes(search.toLowerCase()))
 
   function openQuiz(quiz) {
     setActiveQuiz(quiz); setAnswers([]); setQuestionIndex(0); setResult(null); setSaveMessage('')
@@ -81,7 +85,16 @@ export default function ProvingGround({ assessments = [], attempts = [], user, o
 
       {section === 'coding' && <CodingArena user={user} onLogin={onLogin} initialProblemId={challengeId} />}
 
-      {section === 'notes' && <section className="proving-panel"><div className="proving-panel-heading"><div><h2>Topic notes</h2><p>Short reference notes to reinforce the concepts behind practice.</p></div></div><label className="proving-search"><Search size={16}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search notes or topics" aria-label="Search topic notes"/></label>{visibleNotes.length ? <div className="notes-list">{visibleNotes.map((note) => <article className="topic-note" key={note.id}><small>{note.topic}</small><h3>{note.title}</h3><p>{note.body}</p><ul>{note.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul><div className="note-links"><button onClick={() => { setSection('quizzes'); const quiz = quizTopics.find((item) => item.id === note.quizId); if (quiz) openQuiz(quiz) }}>Related quiz <ArrowRight size={14}/></button>{note.challengeId && <button onClick={() => { setChallengeId(note.challengeId); setSection('coding') }}>Related challenge <ArrowRight size={14}/></button>}</div></article>)}</div> : <div className="proving-empty"><Search size={22}/><b>No notes match that search</b><span>Try another topic or clear your search.</span><button onClick={() => setSearch('')}>Clear search</button></div>}</section>}
+      {section === 'notes' && <section className="proving-panel language-notes-panel">
+        <div className="proving-panel-heading"><div><h2>Programming language notes</h2><p>Choose a language and follow its notes from first steps through advanced and professional topics.</p></div></div>
+        <div className="language-path-picker" role="group" aria-label="Choose a programming language">
+          {languageLearningPaths.map((path) => <button type="button" className={`language-path-choice ${path.id === selectedLanguage ? 'active' : ''}`} key={path.id} aria-pressed={path.id === selectedLanguage} onClick={() => setSelectedLanguage(path.id)}><b>{path.name}</b><small>{path.label} · {path.modules.length} lessons</small></button>)}
+        </div>
+        <div className="language-path-title"><div><span className="section-kicker">{activeLanguage.label} LEARNING PATH</span><h3>{activeLanguage.name}: foundations to advanced</h3><p>{activeLanguage.description}</p></div><span className="language-lesson-count">{visibleLanguageModules.length} of {activeLanguage.modules.length} notes</span></div>
+        <label className="proving-search"><Search size={16}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`Search ${activeLanguage.name} notes`} aria-label={`Search ${activeLanguage.name} notes`}/></label>
+        {visibleLanguageModules.length ? <div className="language-notes-list">{visibleLanguageModules.map((module, index) => <details className="language-note" key={module.title}><summary><span className="language-note-number">{String(index + 1).padStart(2, '0')}</span><span className="language-note-heading"><small>{module.stage}</small><b>{module.title}</b></span><ChevronDown size={17}/></summary><div className="language-note-content"><p>{module.summary}</p><pre><code>{module.example}</code></pre></div></details>)}</div> : <div className="proving-empty"><Search size={22}/><b>No language notes match that search</b><span>Try another term or clear the search field.</span><button onClick={() => setSearch('')}>Clear search</button></div>}
+        <details className="existing-topic-notes"><summary><BookOpen size={16}/> SkillProof topic notes <ChevronDown size={15}/></summary>{visibleNotes.length ? <div className="notes-list">{visibleNotes.map((note) => <article className="topic-note" key={note.id}><small>{note.topic}</small><h3>{note.title}</h3><p>{note.body}</p><ul>{note.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul><div className="note-links"><button onClick={() => { setSection('quizzes'); const quiz = quizTopics.find((item) => item.id === note.quizId); if (quiz) openQuiz(quiz) }}>Related quiz <ArrowRight size={14}/></button>{note.challengeId && <button onClick={() => { setChallengeId(note.challengeId); setSection('coding') }}>Related challenge <ArrowRight size={14}/></button>}</div></article>)}</div> : <p className="existing-notes-empty">No existing topic notes match that search.</p>}</details>
+      </section>}
     </div>}
   </section>
 }

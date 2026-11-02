@@ -11,7 +11,7 @@ function profileForm(profile) {
   return { ...profile, skills: (profile.skills || []).join(', ') }
 }
 
-export default function CareerWorkspace({ onBack, onContinueLearning = () => {}, user, onUpdated, theme, onChangeTheme }) {
+export default function CareerWorkspace({ onBack, onContinueLearning = () => {}, user, onUpdated, theme, onChangeTheme, appearance, onChangeAppearance }) {
   const [profile, setProfile] = useState(null)
   const [projects, setProjects] = useState([])
   const [editForm, setEditForm] = useState(null)
@@ -126,7 +126,7 @@ export default function CareerWorkspace({ onBack, onContinueLearning = () => {},
   if (mode === 'error') return <section className="career-shell"><button className="account-back" onClick={onBack}><ArrowLeft size={16}/> Back</button><div className="career-state" role="alert"><b>We couldn’t load your saved career details.</b><p>{loadingError}</p><button className="primary-button" onClick={loadWorkspace}>Try again</button></div></section>
 
   return <section className="career-shell">
-    <ThemePicker className="career-theme" theme={theme} onChange={onChangeTheme}/>
+    <ThemePicker className="career-theme" theme={theme} onChange={onChangeTheme} appearance={appearance} onChangeAppearance={onChangeAppearance}/>
     <button className="account-back" onClick={onBack}><ArrowLeft size={16}/> Back to explore</button>
     <header className="career-heading"><div><span className="section-kicker">YOUR CAREER PLAN</span><h1>Career Workspace</h1><p>Organize your goal, chosen skills, and project work. Your details stay private until you choose what to share.</p></div><div className="career-avatar"><BriefcaseBusiness size={20}/></div></header>
 
